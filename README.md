@@ -10,7 +10,7 @@ $cd ~/catkin_ws
 $mkdir src
 $cd src
 $git clone https://github.com/rpmsnu/file_player_sthereo_dataset.git
-$cd ~/catkin_ws/src/file_player_sthereo
+$cd ~/catkin_ws/src/file_player_sthereo_dataset
 $bash install_depend_package.sh
 ```
 
