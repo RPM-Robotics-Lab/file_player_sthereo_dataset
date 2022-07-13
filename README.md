@@ -9,8 +9,8 @@ $mkdir ~/catkin_ws
 $cd ~/catkin_ws
 $mkdir src
 $cd src
-$git clone https://github.com/irapkaist/file_player_thermal.git
-$cd ~/catkin_ws/src/file_player_thermal
+$git clone https://github.com/rpmsnu/file_player_sthereo_dataset.git
+$cd ~/catkin_ws/src/file_player_sthereo
 $bash install_depend_package.sh
 ```
 
