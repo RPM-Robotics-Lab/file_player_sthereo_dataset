@@ -155,9 +155,35 @@ void ROSThread::Ready()
   initial_data_stamp_ = data_stamp_.begin()->first - 1;
   last_data_stamp_ = prev(data_stamp_.end(),1)->first - 1;
 
+//Read gps data
+  fp = fopen((data_folder_path_+"/sensor_data/gps.csv").c_str(),"r");
+  double latitude, longitude, altitude, altitude_orthometric;
+  double cov[9];
+  sensor_msgs::NavSatFix gps_data;
+  gps_data_.clear();
+  while( fscanf(fp,"%ld,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",
+                &stamp,&latitude,&longitude,&altitude,&cov[0],&cov[1],&cov[2],&cov[3],&cov[4],&cov[5],&cov[6],&cov[7],&cov[8])
+         == 13
+         )
+  {
+    gps_data.header.stamp.fromNSec(stamp);
+    gps_data.header.frame_id = "gps";
+    gps_data.latitude = latitude;
+    gps_data.longitude = longitude;
+    gps_data.altitude = altitude;
+    for(int i = 0 ; i < 9 ; i ++) gps_data.position_covariance[i] = cov[i];
+    gps_data_[stamp] = gps_data;
+  }
+  cout << "Gps data are loaded" << endl;
+
+  fclose(fp);
+
+
+
+
   //Read inspva data
   fp = fopen((data_folder_path_+"/sensor_data/inspva.csv").c_str(),"r");
-  double latitude, longitude, altitude, altitude_orthometric;
+  // double latitude, longitude, altitude, altitude_orthometric;
   double height, north_velocity, east_velocity, up_velocity, roll, pitch, azimuth;
   // string status;
   char status[17];
@@ -406,7 +432,12 @@ void ROSThread::DataStampThread()
     if(iter->second.compare("gps") == 0){
       gps_thread_.push(stamp);
       gps_thread_.cv_.notify_all();
-    }else if(iter->second.compare("inspva") == 0){
+    }else if(iter->second.compare("gps") == 0)
+    {
+      gps_thread_.push(stamp);
+      gps_thread_.cv_.notify_all();
+    }
+    else if(iter->second.compare("inspva") == 0){
       inspva_thread_.push(stamp);
       inspva_thread_.cv_.notify_all();
     }else if(iter->second.compare("imu") == 0){
@@ -471,7 +502,6 @@ void ROSThread::GpsThread()
       if(gps_data_.find(data) != gps_data_.end()){
         gps_pub_.publish(gps_data_[data]);
       }
-
     }
     if(gps_thread_.active_ == false) return;
   }
